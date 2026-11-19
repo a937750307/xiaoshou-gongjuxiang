@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>销售工具箱</title>
+<style>
+:root{
+  --bg:#f4f6f9; --panel:#ffffff; --ink:#1f2933; --sub:#68737f; --faint:#98a2ad;
+  --line:#e4e9f0; --brand:#1d6fb8; --brand-2:#155a97; --brand-soft:#eaf3fb;
+  --ok:#2c9c6b; --ok-soft:#e7f5ee; --warn:#d98628; --danger:#d24b4b; --r:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--ink);font-size:14px;line-height:1.55;display:flex;overflow:hidden}
+button,input,select,textarea{font-family:inherit;font-size:14px;color:var(--ink)}
+button{cursor:pointer}
+.app{display:flex;width:100%;height:100vh}
+
+aside{width:232px;flex:0 0 232px;background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;height:100vh}
+.logo{padding:20px 20px 16px;border-bottom:1px solid var(--line)}
+.logo h1{font-size:16px;font-weight:700;letter-spacing:.3px}
+.logo p{font-size:12px;color:var(--sub);margin-top:2px}
+.industry-wrap{padding:12px 14px;border-bottom:1px solid var(--line);position:relative}
+.industry-btn{width:100%;display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font-size:13px;font-weight:500;text-align:left}
+.industry-btn:hover{border-color:var(--brand)}
+.industry-btn .tag-ico{width:20px;height:20px;border-radius:5px;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;flex:0 0 20px}
+.industry-btn .cur{flex:1}
+.industry-btn .arrow{color:var(--faint);font-size:11px;transition:transform .2s}
+.industry-btn.open .arrow{transform:rotate(180deg)}
+.industry-menu{display:none;position:absolute;left:14px;right:14px;top:56px;background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 24px rgba(20,40,70,.14);z-index:20;padding:4px}
+.industry-menu.show{display:block}
+.industry-opt{display:flex;align-items:center;gap:8px;width:100%;padding:8px 10px;border:0;background:transparent;border-radius:6px;font-size:13px;color:var(--ink);text-align:left}
+.industry-opt:hover{background:var(--bg)}
+.industry-opt.sel{color:var(--brand-2);font-weight:600;background:var(--brand-soft)}
+.industry-opt .ck{margin-left:auto;color:var(--brand)}
+.industry-hint{padding:6px 10px 4px;font-size:11px;color:var(--faint)}
+.industry-more{display:block;margin-top:4px;padding:9px 10px 5px;border-top:1px solid var(--line);font-size:12px;color:var(--brand);text-decoration:none;text-align:center}
+.industry-more:hover{text-decoration:underline}
+.nav{flex:1;overflow-y:auto;padding:12px 10px}
+.nav-group{margin-bottom:16px}
+.nav-title{font-size:11px;color:var(--faint);letter-spacing:1px;padding:0 10px 6px;text-transform:uppercase}
+.nav-item{display:flex;align-items:center;gap:10px;width:100%;padding:9px 10px;border:0;background:transparent;border-radius:8px;color:var(--sub);text-align:left;margin-bottom:2px}
+.nav-item:hover{background:var(--bg)}
+.nav-item.active{background:var(--brand-soft);color:var(--brand-2);font-weight:600}
+.nav-item .dot{width:8px;height:8px;border-radius:2px;flex:0 0 8px;background:var(--faint)}
+.nav-item.active .dot{background:var(--brand)}
+.nav-item .badge{margin-left:auto;background:var(--danger);color:#fff;font-size:11px;min-width:18px;height:18px;border-radius:9px;display:none;align-items:center;justify-content:center;padding:0 5px}
+.nav-item .badge.show{display:flex}
+.side-foot{padding:12px;border-top:1px solid var(--line);font-size:12px;color:var(--faint)}
+
+main{flex:1;min-width:0;height:100vh;display:flex;flex-direction:column}
+header{height:58px;flex:0 0 58px;background:var(--panel);border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 26px;gap:14px}
+header h2{font-size:16px;font-weight:600}
+header .spacer{flex:1}
+.hint{font-size:12px;color:var(--faint)}
+.btn{border:1px solid var(--line);background:#fff;padding:7px 13px;border-radius:7px;font-size:13px;color:var(--ink)}
+.btn:hover{border-color:var(--brand);color:var(--brand)}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+.btn.primary:hover{background:var(--brand-2)}
+.btn.danger{color:var(--danger);border-color:#f0c9c9}
+.btn.sm{padding:4px 9px;font-size:12px}
+.content{flex:1;overflow-y:auto;padding:24px 26px 60px}
+.site-footer{flex:0 0 auto;background:var(--panel);border-top:1px solid var(--line);padding:12px 26px;display:flex;align-items:center;justify-content:center;gap:22px;font-size:12px;line-height:1.5}
+.site-footer .beian-note{color:var(--danger)}
+.site-footer a{color:var(--ink);text-decoration:none;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.site-footer a:hover{text-decoration:underline}
+.site-footer a img{width:14px;height:14px;display:inline-block}
+.view{display:none}
+.view.active{display:block}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:18px 20px;margin-bottom:18px}
+.card h3{font-size:14px;font-weight:600;margin-bottom:4px}
+.card .desc{font-size:12px;color:var(--sub);margin-bottom:16px}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field label{font-size:12px;color:var(--sub)}
+input,select,textarea{border:1px solid var(--line);border-radius:7px;padding:8px 10px;background:#fff;outline:none;width:100%}
+input:focus,select:focus,textarea:focus{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft)}
+textarea{resize:vertical;min-height:76px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+th{font-size:12px;color:var(--sub);font-weight:600;background:var(--bg)}
+tr:last-child td{border-bottom:0}
+.pill{display:inline-block;padding:2px 8px;border-radius:20px;font-size:12px;background:var(--bg);color:var(--sub)}
+.pill.danger{background:var(--danger-soft);color:var(--danger)}
+.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}
+.pill.brand{background:var(--brand-soft);color:var(--brand-2)}
+.empty{text-align:center;color:var(--faint);padding:26px 10px;font-size:13px}
+.qsec{margin-top:16px;margin-bottom:8px;font-weight:600;color:var(--brand-2);font-size:13px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:15px 18px}
+.stat .k{font-size:12px;color:var(--sub)}
+.stat .v{font-size:22px;font-weight:700;margin-top:3px}
+
+.chips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}
+.chip{border:1px solid var(--line);background:#fff;border-radius:20px;padding:5px 13px;font-size:12px;color:var(--sub)}
+.chip.active{background:var(--brand);border-color:var(--brand);color:#fff}
+.script{border:1px solid var(--line);border-radius:9px;padding:13px 15px;margin-bottom:11px;background:#fff}
+.script .st{display:flex;align-items:center;gap:8px;font-weight:600;font-size:13px}
+.script .st .sp{flex:1}
+.approach{margin-top:10px;background:var(--bg);border-left:3px solid var(--faint);border-radius:0 6px 6px 0;padding:8px 11px;color:var(--sub);font-size:12.5px;line-height:1.6}
+.approach .lbl{display:inline-block;font-size:11px;color:var(--faint);font-weight:600;margin-right:6px;letter-spacing:.5px}
+.speech{margin-top:9px;position:relative;background:var(--brand-soft);border-radius:8px;padding:11px 13px 11px 30px;color:var(--ink);font-size:13.5px;line-height:1.7;white-space:pre-wrap}
+.speech:before{content:"";position:absolute;left:12px;top:13px;width:3px;height:calc(100% - 26px);background:var(--brand);border-radius:2px}
+.speech .lbl{display:inline-block;font-size:11px;color:var(--brand);font-weight:600;margin-right:6px;letter-spacing:.5px}
+.speech-act{display:flex;justify-content:flex-end;margin-top:6px}
+.quote-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.quote-row:last-child{border-bottom:0}
+.quote-row .qi{flex:1;min-width:0}
+.quote-row .qn{font-weight:600;font-size:13px}
+.quote-row .qm{font-size:12px;color:var(--sub)}
+.todo-item{display:flex;align-items:flex-start;gap:11px;padding:11px 0;border-bottom:1px solid var(--line)}
+.todo-item:last-child{border-bottom:0}
+.todo-chk{width:18px;height:18px;flex:0 0 18px;margin-top:2px;border:1.5px solid var(--line);border-radius:5px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;color:#fff;background:#fff}
+.todo-chk.checked{background:var(--ok);border-color:var(--ok)}
+.todo-item .ti{flex:1;min-width:0}
+.todo-item .tt{font-weight:600;font-size:13.5px}
+.todo-item.done .tt{text-decoration:line-through;color:var(--faint)}
+.todo-item .tm{font-size:12px;color:var(--sub);margin-top:3px}
+.todo-item .ta{display:flex;gap:6px;flex:0 0 auto}
+.rule-row{display:flex;gap:8px;align-items:center;margin-bottom:7px}
+.rule-row input{width:auto;flex:1}
+
+.mask{position:absolute;inset:0;background:rgba(23,34,48,.42);display:none;align-items:center;justify-content:center;padding:20px;z-index:50}
+.mask.show{display:flex}
+.modal{background:#fff;border-radius:12px;width:520px;max-width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 18px 50px rgba(20,40,70,.22)}
+.modal.wide{width:720px}
+.modal-h{padding:16px 20px;border-bottom:1px solid var(--line);font-size:15px;font-weight:600;display:flex;justify-content:space-between;align-items:center}
+.modal-h .x{border:0;background:transparent;font-size:20px;color:var(--faint);line-height:1}
+.modal-b{padding:20px}
+.modal-f{padding:14px 20px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:9px}
+.modal .field{margin-bottom:13px}
+#toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:8px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:100}
+#toast.show{opacity:1}
+
+.quote{background:#fff;padding:6px 2px}
+.quote h2{text-align:center;font-size:19px;margin-bottom:4px}
+.quote .qsub{text-align:center;color:var(--sub);font-size:12px;margin-bottom:18px}
+.quote .qrow{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px dashed var(--line);font-size:13px}
+.quote .qrow.total{border-bottom:0;border-top:2px solid var(--ink);margin-top:8px;padding-top:12px;font-weight:700;font-size:16px}
+.quote .qnote{font-size:11px;color:var(--faint);margin-top:18px;line-height:1.6}
+
+@media (max-width:900px){
+  aside{width:180px;flex-basis:180px}
+  .g4{grid-template-columns:repeat(2,1fr)}
+  .content{padding:18px 16px 50px}
+}
+@media (max-width:640px){
+  .site-footer{flex-direction:column;justify-content:center;gap:8px;padding:14px 12px;text-align:center}
+  .site-footer a{justify-content:center}
+}
+@media print{
+  body>*{display:none!important}
+  .mask{display:flex!important;position:fixed;background:#fff;padding:0}
+  .modal-h,.modal-f{display:none!important}
+  .modal{box-shadow:none;width:100%;max-height:none;overflow:visible}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<aside>
+  <div class="logo">
+    <h1>销售工具箱</h1>
+    <p>个人工具 · 数据本地存储</p>
+  </div>
+  <div class="industry-wrap">
+    <button class="industry-btn" id="industryBtn" onclick="toggleIndustry()">
+      <span class="tag-ico">行</span>
+      <span class="cur" id="industryCur">汽车行业</span>
+      <span class="arrow">▼</span>
+    </button>
+    <div class="industry-menu" id="industryMenu"></div>
+  </div>
+  <nav class="nav">
+    <div class="nav-group">
+      <div class="nav-title">常用工具</div>
+      <button class="nav-item active" data-mod="calc"><span class="dot"></span>智能算价器</button>
+      <button class="nav-item" data-mod="scripts"><span class="dot"></span>话术速查</button>
+      <button class="nav-item" data-mod="comm"><span class="dot"></span>个人提成计算器</button>
+      <button class="nav-item" data-mod="todo"><span class="dot"></span>事件提醒器<span class="badge" id="badge-todo">0</span></button>
+    </div>
+  </nav>
+  <div class="side-foot">数据仅存本机浏览器<br>请定期导出备份</div>
+</aside>
+<main>
+  <header>
+    <h2 id="modTitle">智能算价器</h2>
+    <span class="spacer"></span>
+    <button class="btn sm" onclick="exportData()">导出备份</button>
+    <button class="btn sm" onclick="document.getElementById('importFile').click()">导入</button>
+    <input type="file" id="importFile" accept="application/json" style="display:none" onchange="importData(event)">
+  </header>
+  <div class="content" id="content">
+
+    <!-- 智能算价器 -->
+    <section class="view active" id="v-calc">
+      <div class="grid g2">
+        <div class="card">
+          <h3>报价参数</h3>
+          <div class="desc">选择车型可带入指导价，也可手动填写。修改后右侧实时计算。</div>
+          <div class="field"><label>车型（从价格库带入）</label>
+            <select id="q-model" onchange="applyModel()"><option value="">自定义</option></select>
+          </div>
+          <div class="grid g2">
+            <div class="field"><label>裸车价（元）</label><input id="q-price" type="number" value="150000" oninput="calcUpdate()"></div>
+            <div class="field"><label>优惠（元）</label><input id="q-discount" type="number" value="0" oninput="calcUpdate()"></div>
+            <div class="field"><label>购置税</label><select id="q-tax" onchange="calcUpdate()"><option value="1">按裸车价/11.3 计算</option><option value="0">免/已含</option><option value="custom">手动填写</option></select></div>
+            <div class="field"><label>购置税金额（手动时填）</label><input id="q-taxval" type="number" value="0" oninput="calcUpdate()"></div>
+            <div class="field"><label>保险（元）</label><input id="q-ins" type="number" value="5500" oninput="calcUpdate()"></div>
+            <div class="field"><label>上牌费（元）</label><input id="q-reg" type="number" value="500" oninput="calcUpdate()"></div>
+            <div class="field"><label>装潢/精品（元）</label><input id="q-deco" type="number" value="0" oninput="calcUpdate()"></div>
+            <div class="field"><label>其他（元）</label><input id="q-other" type="number" value="0" oninput="calcUpdate()"></div>
+          </div>
+          <div class="qsec">贷款方案</div>
+          <div class="grid g2" style="margin-top:10px">
+            <div class="field"><label>首付比例（%）</label><input id="q-dp" type="number" value="30" oninput="calcUpdate()"></div>
+            <div class="field"><label>年限</label><select id="q-years" onchange="calcUpdate()"><option value="1">1年</option><option value="2">2年</option><option value="3" selected>3年</option><option value="5">5年</option></select></div>
+            <div class="field"><label>年利率（%）</label><input id="q-rate" type="number" value="4.5" step="0.1" oninput="calcUpdate()"></div>
+            <div class="field"><label>还款方式</label><select id="q-method" onchange="calcUpdate()"><option value="equal">等额本息</option><option value="principal">等额本金</option></select></div>
+          </div>
+        </div>
+        <div class="card">
+          <h3>计算结果</h3>
+          <div class="desc">落地价与月供随左侧参数实时更新。</div>
+          <div id="calcResult"></div>
+          <div class="row" style="margin-top:16px">
+            <button class="btn primary" onclick="showQuote()">生成报价单</button>
+            <button class="btn" onclick="copyQuote()">复制报价文本</button>
+            <button class="btn" onclick="saveCurrentQuote()">收藏此方案</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="row" style="margin-bottom:12px"><h3>我的报价方案</h3><span class="spacer" style="flex:1"></span><span class="hint" id="quoteCount"></span></div>
+        <div class="desc">常用方案存起来，下次给客户报同一款车时一键载入，不用重新算。</div>
+        <div id="quoteList"></div>
+      </div>
+      <div class="card">
+        <div class="row" style="margin-bottom:12px"><h3>车型价格库</h3><span class="spacer" style="flex:1"></span><button class="btn sm primary" onclick="editPrice()">+ 添加车型</button></div>
+        <table><thead><tr><th>品牌/车型</th><th>配置</th><th>指导价</th><th>参考优惠</th><th>操作</th></tr></thead><tbody id="priceBody"></tbody></table>
+      </div>
+    </section>
+
+    <!-- 话术速查 -->
+    <section class="view" id="v-scripts">
+      <div class="card">
+        <div class="row" style="margin-bottom:12px">
+          <button class="btn primary" onclick="editScript()">+ 新增话术</button>
+          <input id="scriptSearch" placeholder="搜索标题或内容" style="max-width:260px" oninput="renderScripts()">
+          <button class="btn" onclick="resetScripts()">恢复默认话术库</button>
+          <span class="spacer" style="flex:1"></span>
+          <span class="hint" id="scriptCount"></span>
+        </div>
+        <div class="chips" id="scriptCats"></div>
+        <div id="scriptList"></div>
+      </div>
+    </section>
+
+    <!-- 个人提成计算器 -->
+    <section class="view" id="v-comm">
+      <div class="grid g4" style="margin-bottom:18px">
+        <div class="stat"><div class="k">预计税前总收入</div><div class="v" id="cm-total" style="color:var(--brand-2)">¥0</div></div>
+        <div class="stat"><div class="k">成交台数</div><div class="v" id="cm-count">0</div></div>
+        <div class="stat"><div class="k">变动提成</div><div class="v" id="cm-variable">¥0</div></div>
+        <div class="stat"><div class="k">阶梯奖金</div><div class="v" id="cm-tier">¥0</div></div>
+      </div>
+      <div class="grid g2">
+        <div class="card">
+          <h3>提成规则</h3>
+          <div class="desc">按你店的政策填一次，每月通用。修改即时生效。</div>
+          <div class="grid g2">
+            <div class="field"><label>月底薪（元）</label><input id="cm-base" type="number" value="3000" onchange="setRule('base',this.value)"></div>
+            <div class="field"><label>统计月份</label><input id="cm-month" type="month" onchange="setRule('month',this.value)"></div>
+          </div>
+          <div class="qsec">单车提成（按车型）</div>
+          <div id="cm-carRates"></div>
+          <button class="btn sm" onclick="addCarRate()">+ 添加车型提成</button>
+          <div class="qsec">附加业务提成</div>
+          <div class="grid g2">
+            <div class="field"><label>金融每台（元）</label><input id="cm-fin" type="number" value="200" onchange="setRule('finance',this.value)"></div>
+            <div class="field"><label>保险提成比例（%）</label><input id="cm-ins" type="number" value="8" onchange="setRule('insurancePct',this.value)"></div>
+            <div class="field"><label>精品提成比例（%）</label><input id="cm-deco" type="number" value="10" onchange="setRule('decoPct',this.value)"></div>
+          </div>
+          <div class="qsec">销量阶梯奖金</div>
+          <div class="desc" style="margin-bottom:8px">达到台数即发对应奖金，取最高一档。</div>
+          <div id="cm-tiers"></div>
+          <button class="btn sm" onclick="addTier()">+ 添加阶梯</button>
+        </div>
+        <div class="card">
+          <h3>收入构成</h3>
+          <div class="desc">按下方成交明细自动汇总，仅统计所选月份。</div>
+          <div id="cmBreakdown"></div>
+          <div class="row" style="margin-top:16px">
+            <button class="btn primary" onclick="editDeal()">+ 添加成交</button>
+            <button class="btn" onclick="copyComm()">复制收入明细</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>成交明细</h3>
+        <div class="desc">每成交一台记一条，选中月份的记录才计入统计。</div>
+        <table>
+          <thead><tr><th>日期</th><th>车型</th><th>金融</th><th>保险额</th><th>精品额</th><th>该单提成</th><th>操作</th></tr></thead>
+          <tbody id="dealBody"></tbody>
+        </table>
+        <div class="desc" id="dealSummary" style="margin-top:14px;margin-bottom:0"></div>
+      </div>
+    </section>
+
+    <!-- 事件提醒器 -->
+    <section class="view" id="v-todo">
+      <div class="grid g4" style="margin-bottom:18px">
+        <div class="stat"><div class="k">今天要做</div><div class="v" id="td-today">0</div></div>
+        <div class="stat"><div class="k">已逾期</div><div class="v" id="td-over" style="color:var(--danger)">0</div></div>
+        <div class="stat"><div class="k">未来7天</div><div class="v" id="td-week">0</div></div>
+        <div class="stat"><div class="k">已完成</div><div class="v" id="td-done">0</div></div>
+      </div>
+      <div class="card">
+        <div class="row" style="margin-bottom:12px">
+          <button class="btn primary" onclick="editTodo()">+ 新增事件</button>
+          <div class="chips" id="todoCats" style="margin:0"></div>
+          <span class="spacer" style="flex:1"></span>
+          <button class="btn" onclick="clearDoneTodos()">清除已完成</button>
+        </div>
+        <div class="desc">按日期排序，逾期标红。适合记"某天前要做的事"：交资料、回访客户、跟进报价、开会等，厂家系统里的客户跟进不重复记。</div>
+        <div id="todoList"></div>
+      </div>
+    </section>
+
+  </div>
+  <footer class="site-footer">
+    <span class="beian-note">本站内容仅供学习和交流，非商业用途</span>
+    <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">浙ICP备2025187466号</a>
+    <a href="https://www.beian.gov.cn/portal/registerSystemInfo?recordcode=33030402001483" target="_blank" rel="noopener noreferrer"><img src="https://www.937788.xyz/gonganbeian.png" alt="公安备案">浙公网安备33030402001483号</a>
+  </footer>
+</main>
+</div>
+
+<div class="mask" id="mask">
+  <div class="modal" id="modal">
+    <div class="modal-h"><span id="modalTitle">编辑</span><button class="x" onclick="closeModal()">×</button></div>
+    <div class="modal-b" id="modalBody"></div>
+    <div class="modal-f" id="modalFoot"></div>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script>
+/* ========== 数据层 ========== */
+var KEY='salesToolbox_v1';
+var S=load();
+
+function defaults(){
+  var t=today();
+  return {
+    prices:[
+      {id:uid(),brand:'示例品牌',model:'示例车型A',trim:'舒适型',guide:159800,discount:12000},
+      {id:uid(),brand:'示例品牌',model:'示例车型A',trim:'豪华型',guide:179800,discount:15000},
+      {id:uid(),brand:'示例品牌',model:'示例车型B',trim:'旗舰型',guide:259800,discount:20000}
+    ],
+    scripts:[
+      {id:uid(),cat:'异议应对',title:'客户说"太贵了"',approach:'先认同情绪，再把价格拆成价值与月供，用方案转移焦点，不直接让利。',content:'理解您的顾虑，买车确实要看整体价值。我们这款车在同级别里配置更全，而且目前有金融贴息方案，月供摊下来压力其实不大。我帮您算个详细方案对比一下？'},
+      {id:uid(),cat:'异议应对',title:'客户说"再考虑考虑"',approach:'不施压，先问出真实顾虑点，针对解决，把模糊的"考虑"变成具体问题。',content:'没问题，买车是该多比较。方便问下您主要还在纠结哪方面吗？是价格、配置还是颜色？我先把这个问题帮您解决，您再决定也不迟。'},
+      {id:uid(),cat:'异议应对',title:'客户说"我去别家看看"',approach:'不阻拦，给一份可带走的对比清单，留个钩子等客户回头。',content:'应该的，多对比才放心。我帮您把这款车的配置和金融方案列份清单，您带着去对比，参数一目了然。回头有疑问随时找我。'},
+      {id:uid(),cat:'异议应对',title:'客户说"等降价再买"',approach:'讲清价格趋势和等待的隐性成本（配置、颜色、政策），强调当下用车需求。',content:'车价短期波动其实有限，但您每天用车的需求是实实在在的。现在有现车、配置颜色也全，等到所谓低价时未必有您想要的。我把当前方案给您算清楚，早买早享受。'},
+      {id:uid(),cat:'异议应对',title:'客户说"网上报价更低"',approach:'拆解网价口径（引流价、附加条件），用真实落地价明细逐项对比。',content:'网上很多是引流价或带条件的价格，比如必须贷款、店内保险、指定配置。我把咱们的真实落地价明细列给您，一项项对比，您会发现差距其实很小，而且我们交付和售后更有保障。'},
+      {id:uid(),cat:'异议应对',title:'客户说"保值率不行"',approach:'用真实二手成交数据和官方回购政策说话，不空口辩解。',content:'保值率要看三年残值和品牌整体表现，我不能只说好话。我给您看近几年同款车的二手成交数据，再和同价位车型对比。另外我们有官方回购政策，能降低您这部分顾虑。'},
+      {id:uid(),cat:'异议应对',title:'客户说"油耗太高"',approach:'回到真实使用场景，用老客户反馈和年油费账说话，必要时提供混动选项。',content:'油耗跟路况和驾驶习惯关系很大，官方是综合工况数据。我给您看几位老客户的真实油耗反馈，再帮您算一年大概的油费差。如果确实在意，我们也有混动版可以对比。'},
+      {id:uid(),cat:'异议应对',title:'客户说"朋友买得更便宜"',approach:'承认时间差导致政策不同，主动核对成交条件，能用配置颜色补足。',content:'不同时间点的优惠政策确实不一样，您朋友那会儿的力度我理解。这样，我按您朋友的成交条件帮您核对一下，能争取的我尽量争取，配置或颜色上再给您补足。'},
+      {id:uid(),cat:'异议应对',title:'客户说"预算不够"',approach:'降低一次性付款门槛，用金融方案按预算倒推月供。',content:'没关系，咱们不一定要一次付全款。目前首付低至两成，我按您的预算倒推月供，做个您能接受的方案。买车最重要的是合适，不是硬凑。'},
+      {id:uid(),cat:'异议应对',title:'客户说"配置不如竞品"',approach:'聚焦高频使用配置，转移到做工、质保、用车成本等综合价值。',content:'参数表上竞品确实有几项看着多，但您日常真正用得到的是哪几项？我们把最常用的配置挑出来对比，再看做工、质保和后期用车成本，您会觉得更踏实。'},
+      {id:uid(),cat:'金融政策',title:'首付与月供讲解',approach:'先给政策范围，再用具体数字举例，最后给两种还款方式让客户选。',content:'目前首付低至两成，最长可分期60期。以10万贷款为例，月供约1800元。您可以选等额本息月供固定，或等额本金总利息更低，我按您的预算算两种方案。'},
+      {id:uid(),cat:'金融政策',title:'客户问"零利率是真的吗"',approach:'如实说明活动真实性与限制条件，用总成本计算让客户自己判断。',content:'厂家贴息活动是真的，但通常有期限和车型限制，也可能搭配店内保险等条件。我把活动细则给您看清楚，再帮您算总成本，是真优惠还是有附加，一眼就明白。'},
+      {id:uid(),cat:'金融政策',title:'客户质疑"手续费"',approach:'讲清费用对应的服务内容，并给全款/贷款两种方案对比，把选择权交客户。',content:'这笔费用对应的是贷款审批、抵押登记、放款跟进和后续解押，全程我们帮您跑。我也可以给您对比全款和贷款两种方案的总支出，您选哪个都行。'},
+      {id:uid(),cat:'金融政策',title:'客户问"能提前还款吗"',approach:'如实说明规则，建议长贷低月供、宽裕时提前还的灵活策略。',content:'大部分方案支持提前还款，一般满一年后免违约金，具体以合同为准。如果贷期较长，我建议先按较长年限算低月供，手头宽裕时再提前还，这样更灵活。'},
+      {id:uid(),cat:'金融政策',title:'贷款需要哪些材料',approach:'提前列清材料清单，主动提出预审，减少客户往返。',content:'一般需要身份证、驾驶证、收入证明或银行流水、征信授权，已婚的话还要配偶资料。材料齐的话审批很快，我可以先帮您预审，避免白跑一趟。'},
+      {id:uid(),cat:'金融政策',title:'征信不好能办吗',approach:'给方向但不轻易承诺，用预审降低客户心理压力。',content:'征信情况要具体看，轻微逾期一般还有沟通空间。您可以先授权我这边做个预审，不查明细、不影响征信，结果出来我们再定方案，别自己先着急。'},
+      {id:uid(),cat:'竞品对比',title:'与竞品价格对比',approach:'不贬低竞品，把对比维度从车价转到保养、保值、标配，算三年总成本。',content:'竞品确实有价格优势，但您可以对比保养成本、保值率和标配内容。我们把这三项差异列出来算个三年总成本，您会更清楚。'},
+      {id:uid(),cat:'竞品对比',title:'配置差异怎么讲',approach:'做一张只列客户常用配置的差异清单，可视化对比胜过口头描述。',content:'我只列您真正会用到的配置，比如倒车影像、座椅加热、辅助驾驶。哪些是我们标配对方选装，哪些反过来，标出来一目了然，比口头说更有说服力。'},
+      {id:uid(),cat:'竞品对比',title:'用车成本对比',approach:'算三年总账，把保养、能耗、易损件都列出来，揭示低价车后期成本高。',content:'把保养周期、单次费用、油耗电耗、易损件价格都列出来。很多车买时便宜、后期保养贵，三年下来差别不小，您看这张表就清楚了。'},
+      {id:uid(),cat:'竞品对比',title:'售后网点对比',approach:'强调网点密度、营业时间和救援响应的实际便利。',content:'我们品牌在当地的网点数量和营业时间我可以给您列出来，保养维修都方便。您也可以想想，哪天需要救援，哪个品牌响应更快。'},
+      {id:uid(),cat:'竞品对比',title:'试驾体验怎么引导',approach:'不劝客户否定竞品，安排两次试驾并排感受，让客户自己下结论。',content:'每台车开起来感觉不一样，您亲自试过最有发言权。我这台车您重点感受转向手感和隔音，待会儿我们并排聊，您说说哪台更合您。'},
+      {id:uid(),cat:'产品亮点',title:'展厅30秒开场介绍',approach:'30秒内讲清三个核心优势，再按客户兴趣点展开。',content:'这款车是我们品牌的主销车型，三个核心优势：空间同级领先、智能配置齐全、油耗经济保养成本低。您更关注哪一块，我重点给您介绍。'},
+      {id:uid(),cat:'产品亮点',title:'空间怎么讲',approach:'用客户亲身坐进来的体验代替轴距数字，落到家庭使用场景。',content:'与其说轴距多少，不如您坐进来试试。前排调好座椅后，后排还能轻松翘腿，后备箱能放下两个行李箱加婴儿车。家里人坐着舒服，这才是空间的意义。'},
+      {id:uid(),cat:'产品亮点',title:'智能配置怎么讲',approach:'只演示三个最高频功能，做给他看比列配置表更有效。',content:'我给您演示三个最常用的：语音控制导航和空调、手机远程查看车辆、自动泊车辅助。不求全，把您每天用得上的功能演示一遍，比列二十项配置更管用。'},
+      {id:uid(),cat:'产品亮点',title:'安全配置怎么讲',approach:'从家人角度切入，现场演示关键安全功能的触发方式。',content:'安全配置平时看不见，但关键时刻很重要。这款车标配了车身稳定、多气囊和主动刹车，我给您演示一下碰撞预警的触发方式，您自己感受下。'},
+      {id:uid(),cat:'产品亮点',title:'动力与续航怎么讲',approach:'先问客户用车场景再针对性讲，避免自说自话。',content:'如果主要市区通勤，动力够用且省油才是关键；常跑高速我再重点讲后段加速和续航。您平时用车是什么场景？我按您的实际需要讲。'},
+      {id:uid(),cat:'营销文案',title:'朋友圈新车到店',approach:'配实拍图发朋友圈，突出到店可看，引导私信预约。',content:'新车到店，实拍比参数更有说服力。今天展厅到了一台【车型】，颜色和配置都很能打。想看实车的朋友私信我，帮你预留看车时间。'},
+      {id:uid(),cat:'营销文案',title:'邀约到店话术',approach:'用现车和专属优惠做由头，给出明确时间选项，提前准备省客户时间。',content:'您好，我是XX店的XX。之前您关注的【车型】最近有现车，颜色比较全，这周还有专属优惠。您看周几方便到店？我提前把车准备好，帮您省点时间。'},
+      {id:uid(),cat:'营销文案',title:'交车后跟进',approach:'提车一周后主动关怀，顺带做保养预告，制造二次联系理由。',content:'交车只是开始。您的车用了一周，如果有不顺手的地方随时问我。另外首次保养的里程和时间我帮您记着，到时提前提醒您。'},
+      {id:uid(),cat:'营销文案',title:'周末活动邀约',approach:'用活动和礼品做由头，给客户留名额的专属感。',content:'这周末我们店里有试驾体验活动，到店就能试驾【车型】，还有小礼品。您要是这阵子在考虑换车，正好过来实地感受一下，我给您留个名额。'},
+      {id:uid(),cat:'营销文案',title:'老客户转介绍',approach:'先感谢再请求，说明推荐有回馈，强调客户一句话的分量。',content:'感谢您的信任！如果身边有朋友最近在看车，麻烦帮我留意一下，推荐成功我这边会给您一份心意。您的一句话，比我说十句都管用。'},
+      {id:uid(),cat:'营销文案',title:'节假日问候',approach:'节日问候加安全提醒，软性带出保养预约，不硬推销。',content:'【节日】快乐！开车出门注意安全。您的爱车如果有保养或检查需求，节后可以找我，我帮您安排，免得排队。'},
+      {id:uid(),cat:'营销文案',title:'特价车清库',approach:'强调现车数量有限、力度大，制造稀缺感，引导私信看实拍。',content:'店里还有几台【车型】现车，颜色配置有限，力度比平时大不少。想捡个实惠的朋友可以私信我，先到先得，我发实拍给您。'},
+      {id:uid(),cat:'营销文案',title:'试驾邀请',approach:'降低试驾心理门槛，强调路线自选、有人陪同。',content:'看车不如试车。您感兴趣的那台车我随时能安排试驾，路线您自己选，市区或快速路都行。找个您方便的时间，我陪您开一圈。'},
+      {id:uid(),cat:'展厅接待',title:'首次到店破冰',approach:'先给空间降低防备，再快速了解来意，帮客户省时间建立专业感。',content:'欢迎光临！我是XX，您先随便看，不用拘束。您是第一次来我们店吧？方便的话告诉我您大概想看什么类型的车，我帮您省点时间，不合适的也不耽误您。'},
+      {id:uid(),cat:'展厅接待',title:'需求探询四问',approach:'用四个自然问题锁定用途、驾驶人、预算、置换痛点，推荐才准。',content:'想先了解四点：一是家用还是商用，二是主要谁开，三是预算区间，四是现在开的什么车、最不满意哪点。问完这四点，推荐基本就准了。'},
+      {id:uid(),cat:'展厅接待',title:'邀约试驾',approach:'强调开过才有真实感受，把路线选择权交给客户。',content:'车光看不够，开一圈感受才真实。我帮您安排试驾，路线您定，我陪您开。方向盘握上，转向、动力、隔音这些感受就都有答案了。'},
+      {id:uid(),cat:'展厅接待',title:'试驾后促单',approach:'趁试驾热度，先问感受再确认配置颜色、算落地价，用政策推动当天决策。',content:'刚才开下来您感觉怎么样？如果整体满意，我帮您把配置和颜色确认一下，再算个落地价，今天定还能赶上这波政策。'},
+      {id:uid(),cat:'成交促单',title:'二选一逼单',approach:'不问买不买，只让客户在具体选项里选，推动决策往前走。',content:'您看是舒适型还是豪华型更合适？颜色是白色还是灰色？先定下来，我这边好帮您安排。'},
+      {id:uid(),cat:'成交促单',title:'优惠时效性',approach:'说明政策的真实截止时间，帮客户锁定名额，不空喊"最后一天"。',content:'这波政策是厂家季度活动，到月底截止。我能帮您申请的就是这些，过了时间确实争取不到了。您要是确定，我今天就把名额给您锁上。'},
+      {id:uid(),cat:'成交促单',title:'现车稀缺',approach:'如实告知库存，给出明确的保留时限，制造合理紧迫感。',content:'这个配置店里就剩一台现车了，颜色也是您喜欢的。如果您确定要，我先帮您留着，给您留到今天下班，您看行吗？'},
+      {id:uid(),cat:'成交促单',title:'签单确认',approach:'签单前逐项核对并再次确认，降低客户签约前的犹豫。',content:'我再跟您核对一遍：车型配置、颜色、落地价、交付时间、随车物品都在这儿，您确认没问题咱们就签。后面有任何问题，随时找我。'},
+      {id:uid(),cat:'交车售后',title:'交车仪式讲解',approach:'交车时演示功能、确认随车物品和证件，并预告保养时间。',content:'我给您演示一下常用功能，再确认油量、随车工具和证件。这是您的保单和保养手册，保养时间我帮您记着，到时提前提醒。'},
+      {id:uid(),cat:'交车售后',title:'一周回访',approach:'提车一周主动关怀使用体验，主动提出帮忙解决问题。',content:'您提车一周了，用着还顺手吗？有没有什么功能不太会用的？如果有小问题您别自己琢磨，直接问我，我帮您处理。'},
+      {id:uid(),cat:'交车售后',title:'保养提醒',approach:'临近保养里程主动联系，提供预约免排队服务。',content:'您的车快到首次保养里程了，我帮您约个时间？提前预约不用排队，您方便的话我给您安排。'},
+      {id:uid(),cat:'线上响应',title:'线上留资首次响应·自报家门',approach:'第一时间响应建立信任：感谢关注+自报家门+说明来意，开放式提问引导对话，不急于推销。',content:'XX先生/女士，感谢您关注XX品牌，我是XX店的体验顾问XXX，看到您在XX留下资料，请问有什么可以帮您？'},
+      {id:uid(),cat:'线上响应',title:'留资客户未回复·二次触达',approach:'间隔半天到一天再联系，换个理由（现车/活动/资料）不重复催问，降低打扰感。',content:'XX先生/女士，我是XX店的XXX，昨天跟您联系过。怕您忙没看到消息，主要想问两点：这款车您是想了解价格，还是想约时间到店看看？不方便的话我改天再联系您。'},
+      {id:uid(),cat:'需求探询',title:'需求响应8要素（首次沟通）',approach:'首次沟通摸清客户底数，按8要素自然提问；带★的是决定推荐方向的关键：置换、新购信息、购买方式、购车时间。',content:'为了帮您推荐更合适的车型，我想简单了解几点：★您现在开什么车、有没有置换打算？★这次想买什么车、预算和配置有要求吗？★打算全款还是贷款？★计划什么时候用车？另外主要是谁开、谁一起做决定？平时用车是什么场景？之前看过哪些车？有没有在对比别的品牌？'},
+      {id:uid(),cat:'需求探询',title:'需求8要素速记清单（带★重点）',approach:'给自己的速记清单，核对是否问全；★为重点项，缺哪项就补问哪项，避免推荐跑偏。',content:'★现有车及置换信息｜★新购车信息（车型/预算/配置）｜★购买方式｜★购买时间｜使用人及决策人｜用车场景｜看车经历｜竞品信息。逐项核对，★项必问。'},
+      {id:uid(),cat:'首邀三件套',title:'首邀① 发送邀请函',approach:'邀约前先发正式邀请函，写明时间、地点、专属安排，让客户感到被重视，为到店铺垫。',content:'XX先生/女士，这是我给您准备的专属邀请函：X月X日XX店XX车型品鉴会，为您留了专座和试驾车，到店还有专属礼遇。我把邀请函发您，您看这个时间方便吗？'},
+      {id:uid(),cat:'首邀三件套',title:'首邀② 发送产品视频',approach:'发精简产品视频让客户提前建立认知，配一句话说明重点，看完顺势邀约。',content:'这是这款车的核心亮点视频，三分钟看完主要有空间、智能、安全三块。您先有个印象，一会儿到店我再针对性给您演示，眼见为实。'},
+      {id:uid(),cat:'首邀三件套',title:'首邀③ 发送地图路书',approach:'发带路线和停车信息的地图路书，降低到店门槛，消除"找不到路"的顾虑。',content:'这是到店的地图路书，导航直接搜XX店，门口有免费停车位，从X号线X站出来步行五分钟。您按这个走就行，快到时给我打电话，我出来接您。'},
+      {id:uid(),cat:'短信模板',title:'首次沟通后致谢短信',approach:'沟通后趁热发短信：致谢+自我介绍+店名+地址+电话，要素齐全，方便客户回看和保存。',content:'XX先生/女士，感谢今天关注XX品牌！我是XX店体验顾问XXX，电话XXX。我们店在XX市XX区XX路XX号，有任何用车问题随时联系我，祝您生活愉快。'},
+      {id:uid(),cat:'短信模板',title:'到店邀约短信',approach:'短信确认时间地点，附地图链接和联系人，简洁明确，方便客户保存到手机。',content:'XX先生/女士，约好X月X日X点到XX店看XX车型，我是顾问XXX，电话XXX。地址XX市XX区XX路XX号，地图我已发您，到店联系我即可。期待见面。'},
+      {id:uid(),cat:'静态讲解',title:'静态讲解期间需求分享·8要素',approach:'讲解中穿插确认需求，8要素逐一核实；带★的先问，边讲边记录，让客户觉得你是按需讲解而非背书。',content:'这边我边给您介绍边确认几个信息，好按您的需求讲：★现有车辆及置换信息｜★新购车型/预算/配置需求｜★购买方式｜★计划购车时间｜使用人与决策人｜日常用车场景｜过往看车经历｜对比竞品信息。'},
+      {id:uid(),cat:'静态讲解',title:'讲解后需求复述确认',approach:'讲解完把听到的需求复述一遍，让客户确认，既显示认真又为推荐方案做铺垫。',content:'我概括一下您的情况：现在开XX车、打算置换，想买XX万左右的XX车型，倾向贷款，X个月内用车，主要您爱人开、您一起定，平时市区通勤偶尔跑高速，之前看过XX品牌。我这样理解对吗？'},
+      {id:uid(),cat:'品牌宣传',title:'品牌实力宣传',approach:'讲品牌先给可感知的事实（历史、销量、网点、技术），再落到客户利益，避免过度自夸。',content:'XX品牌深耕多年，全国有XX家服务网点，销量和口碑都在前列。选它最实在的好处是：车保值、保养便宜、网点多维修方便。您后续用车省心，这才是品牌的意义。'},
+      {id:uid(),cat:'品牌宣传',title:'为什么选我们店',approach:'从专业、诚信、服务三个角度讲门店优势，用具体承诺代替空话。',content:'您在我们店买车有三点不一样：一是顾问一对一全程跟进，二是价格政策透明不玩套路，三是售后有专属通道。买车只是开始，后面保养、救援您都能直接找我。'},
+      {id:uid(),cat:'竞品攻防',title:'客户没在看竞品·感谢信任',approach:'客户明确没对比其他品牌时，先感谢信任、稳住心态，再主动把价值讲透，不要让客户觉得"没得选"。',content:'谢谢您这么信任我们，没去看别家我就更要把该讲的讲清楚。我不因为您没对比就省着说，配置、政策、用车成本我都给您说明白，让您买得踏实、心里有底。'},
+      {id:uid(),cat:'竞品攻防',title:'客户在看竞品·不贬低',approach:'不贬低竞品，主动引导客观对比，把话题拉到用车成本和长期价值上。',content:'您在看XX我理解，多比较是对的。我不说人家不好，咱们把保养成本、保值率、标配内容摆出来算笔账，三年下来差多少一目了然，您自己判断。'},
+      {id:uid(),cat:'竞品攻防',title:'竞品价格更低·拆口径',approach:'拆解低价背后的条件（贷款、保险、加装、配置），用落地价明细对比，不硬降价。',content:'对方报价低可能有条件，比如必须贷款、店内保险或指定配置。我建议咱们比真实落地价，我把明细一项项列给您，您拿着去对比，心里有数。'},
+      {id:uid(),cat:'试驾提示',title:'试驾前温馨提示',approach:'试驾前主动提示安全和车内注意事项，特别提醒上下车小心碰头、调座椅系安全带，体现专业细心。',content:'试驾前跟您说几个小提示：这车车门有点高，上下车小心碰头；上车先调好座椅和后视镜，系好安全带。路上我陪着您，您按平时习惯开就行，有任何不确定的随时问我。'},
+      {id:uid(),cat:'试驾提示',title:'试驾路线与体验引导',approach:'试驾中给明确体验点（起步、隔音、转向、刹车），让客户有感受而不是漫无目的转一圈。',content:'待会儿路线我选了一段综合路况：起步感受一下动力，高架段听听隔音，弯道试试转向，最后来个缓刹。您重点体会这几项，开完咱们聊聊感受。'},
+      {id:uid(),cat:'活动政策',title:'活动政策介绍',approach:'讲清活动内容、时间、权益和门槛，不夸大，让客户知道"现在买"的具体好处。',content:'目前我们在做XX活动，到月底截止：订车享XX优惠，另送XX礼包，置换再加XX补贴。我把政策明细发您，符合哪几项我帮您都申请上。'},
+      {id:uid(),cat:'活动政策',title:'政策时效与稀缺',approach:'用真实的时间节点和名额说明理由，不炒作焦虑，帮客户做决定。',content:'这波政策是季度活动，X月底结束，之后力度会收回。您要是确定车型，我建议先把名额锁上，到时候配置颜色也更齐全。'},
+      {id:uid(),cat:'到家关怀',title:'客户到家关怀短信',approach:'客户试驾或看车离店后当天问候到家，顺带留个开放口，不推销，维持好感。',content:'XX先生/女士，今天看车辛苦了，到家了吗？路上注意安全。资料我整理好了发您，有任何想到的问题随时问我，不急着决定。'},
+      {id:uid(),cat:'到家关怀',title:'节假日与保养关怀',approach:'节假日或保养节点主动关怀，提供实用提醒，把关系从"卖车"延续到"用车"。',content:'XX先生/女士，节假日用车人多，出门前记得看下胎压和油量。您的车快到保养里程了，需要的话我帮您预约，省得排队。有任何问题随时找我。'},
+    ],
+    quotes:[],
+    comm:{base:3000,month:t.slice(0,7),carRates:[{id:uid(),model:'示例车型A 舒适型',rate:300},{id:uid(),model:'示例车型A 豪华型',rate:400},{id:uid(),model:'示例车型B 旗舰型',rate:600}],finance:200,insurancePct:8,decoPct:10,tiers:[{id:uid(),count:5,bonus:1000},{id:uid(),count:10,bonus:3000}],deals:[]},
+    todos:[
+      {id:uid(),title:'给张先生发报价方案',date:t,time:'10:00',cat:'客户跟进',note:'示例车型A舒适型，含金融方案',done:false},
+      {id:uid(),title:'提交李女士的保险资料',date:dateAdd(t,1),time:'',cat:'交车办证',note:'身份证+合格证复印件',done:false},
+      {id:uid(),title:'回访上周交车的赵女士',date:dateAdd(t,-1),time:'',cat:'售后回访',note:'逾期示例：问用车感受',done:false},
+      {id:uid(),title:'周会：本月目标复盘',date:dateAdd(t,3),time:'14:30',cat:'内部事务',note:'',done:false}
+    ],
+    settings:{cat:'全部'},
+    scriptVer:4
+  };
+}
+function load(){
+  try{var raw=localStorage.getItem(KEY); if(raw){var o=JSON.parse(raw); var d=defaults(); var oldVer=o.scriptVer; for(var k in d){if(o[k]===undefined)o[k]=d[k];} if(!o.comm)o.comm=d.comm; o.scripts=upgradeScripts(o.scripts,d.scripts,oldVer); o.scriptVer=d.scriptVer; return o;}}catch(e){}
+  try{var old=localStorage.getItem('salesDesk_v1'); if(old){var p=JSON.parse(old); var d2=defaults(); if(p.prices)d2.prices=p.prices; if(p.scripts)d2.scripts=p.scripts; return d2;}}catch(e){}
+  return defaults();
+}
+function upgradeScripts(oldList,newList,ver){
+  if(ver>=4&&oldList&&oldList.length)return oldList;
+  var titles={};newList.forEach(function(s){titles[s.title]=1;});
+  var custom=(oldList||[]).filter(function(s){return s&&s.title&&!titles[s.title];});
+  return newList.concat(custom);
+}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){toast('保存失败：存储空间不足');}}
+function uid(){return 'id'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function today(){var d=new Date();return d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate());}
+function p2(n){return n<10?'0'+n:''+n;}
+function dateAdd(s,n){var d=s?new Date(s+'T00:00:00'):new Date();d.setDate(d.getDate()+n);return d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate());}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function money(n){return Number(n||0).toLocaleString('zh-CN',{maximumFractionDigits:2});}
+function toast(msg){var el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');clearTimeout(toast._t);toast._t=setTimeout(function(){el.classList.remove('show');},2000);}
+function fld(label,id,val){return '<div class="field"><label>'+label+'</label><input id="'+id+'" value="'+esc(val||'')+'"></div>';}
+
+/* ========== 弹窗 / 备份 ========== */
+function openModal(title,body,foot,wide){
+  document.getElementById('modalTitle').textContent=title;
+  document.getElementById('modalBody').innerHTML=body;
+  document.getElementById('modalFoot').innerHTML=foot||'<button class="btn" onclick="closeModal()">关闭</button>';
+  document.getElementById('modal').className='modal'+(wide?' wide':'');
+  document.getElementById('mask').classList.add('show');
+}
+function closeModal(){document.getElementById('mask').classList.remove('show');}
+document.getElementById('mask').addEventListener('click',function(e){if(e.target===this)closeModal();});
+function exportData(){
+  var blob=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='销售工具箱备份_'+today()+'.json';a.click();
+  setTimeout(function(){URL.revokeObjectURL(a.href);},1000);
+  toast('已导出备份文件');
+}
+function importData(e){
+  var f=e.target.files[0];if(!f)return;
+  var r=new FileReader();
+  r.onload=function(){
+    try{var o=JSON.parse(r.result);if(!o.prices&&!o.scripts)throw 0;var d=defaults();for(var k in d){if(o[k]===undefined)o[k]=d[k];}if(!o.comm)o.comm=d.comm;S=o;save();renderAll();toast('导入成功');}
+    catch(err){toast('文件格式不正确');}
+  };
+  r.readAsText(f);e.target.value='';
+}
+
+/* ========== 行业切换 ========== */
+var INDUSTRIES=['汽车行业'];
+function curIndustry(){return (S.settings&&S.settings.industry)||INDUSTRIES[0];}
+function renderIndustry(){
+  var cur=curIndustry();
+  document.getElementById('industryCur').textContent=cur;
+  var menu=document.getElementById('industryMenu');
+  menu.innerHTML='<div class="industry-hint">选择行业</div>'+INDUSTRIES.map(function(name){
+    return '<button class="industry-opt'+(name===cur?' sel':'')+'" onclick="pickIndustry(\''+esc(name)+'\')">'+esc(name)+(name===cur?'<span class="ck">✓</span>':'')+'</button>';
+  }).join('')+'<a class="industry-more" href="https://www.937788.xyz" target="_blank" rel="noopener noreferrer">更多行业请联系开发者 ↗</a>';
+}
+function toggleIndustry(){
+  var menu=document.getElementById('industryMenu');
+  var btn=document.getElementById('industryBtn');
+  var show=!menu.classList.contains('show');
+  menu.classList.toggle('show',show);btn.classList.toggle('open',show);
+}
+function pickIndustry(name){
+  S.settings.industry=name;save();renderIndustry();toggleIndustry();toast('已切换到'+name);
+}
+document.addEventListener('click',function(e){
+  var wrap=document.querySelector('.industry-wrap');
+  if(wrap&&!wrap.contains(e.target)){
+    document.getElementById('industryMenu').classList.remove('show');
+    document.getElementById('industryBtn').classList.remove('open');
+  }
+});
+
+/* ========== 导航 ========== */
+var MODS={calc:'智能算价器',scripts:'话术速查',comm:'个人提成计算器',todo:'事件提醒器'};
+var cur='calc';
+document.querySelectorAll('.nav-item').forEach(function(b){
+  b.addEventListener('click',function(){
+    document.querySelectorAll('.nav-item').forEach(function(x){x.classList.remove('active');});
+    b.classList.add('active');cur=b.dataset.mod;
+    document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active');});
+    document.getElementById('v-'+cur).classList.add('active');
+    document.getElementById('modTitle').textContent=MODS[cur];
+  });
+});
+function renderAll(){renderIndustry();renderCalc();renderQuotes();renderScripts();renderComm();renderTodo();}
+
+/* ========== 算价器 ========== */
+function renderCalc(){
+  var sel=document.getElementById('q-model');
+  sel.innerHTML='<option value="">自定义</option>'+S.prices.map(function(p){return '<option value="'+p.id+'">'+esc(p.brand+' '+p.model+' '+p.trim)+'</option>';}).join('');
+  var tb=document.getElementById('priceBody');
+  tb.innerHTML=S.prices.length?S.prices.map(function(p){
+    return '<tr><td>'+esc(p.brand+' '+p.model)+'</td><td>'+esc(p.trim)+'</td><td>'+money(p.guide)+'</td><td>'+money(p.discount)+'</td>'+
+      '<td><button class="btn sm" onclick="editPrice(\''+p.id+'\')">编辑</button> <button class="btn sm danger" onclick="delPrice(\''+p.id+'\')">删</button></td></tr>';
+  }).join(''):'<tr><td colspan="5"><div class="empty">暂无车型，点击右上角添加</div></td></tr>';
+  calcUpdate();
+}
+function applyModel(){
+  var p=S.prices.find(function(x){return x.id===document.getElementById('q-model').value;});
+  if(p){document.getElementById('q-price').value=p.guide;document.getElementById('q-discount').value=p.discount;}
+  calcUpdate();
+}
+function g(id){return parseFloat(document.getElementById(id).value)||0;}
+function calcData(){
+  var price=g('q-price'),disc=g('q-discount'),net=Math.max(0,price-disc);
+  var taxMode=document.getElementById('q-tax').value;
+  var tax=taxMode==='1'?net/11.3:(taxMode==='custom'?g('q-taxval'):0);
+  var ins=g('q-ins'),reg=g('q-reg'),deco=g('q-deco'),other=g('q-other');
+  var total=net+tax+ins+reg+deco+other;
+  var dp=g('q-dp'),years=parseInt(document.getElementById('q-years').value),rate=g('q-rate')/100/12;
+  var loan=Math.max(0,total*(1-dp/100)),n=years*12,equal=0,first=0,last=0,interest=0;
+  if(loan>0){
+    if(rate===0){equal=loan/n;first=last=equal;}
+    else{
+      var pow=Math.pow(1+rate,n);
+      equal=loan*rate*pow/(pow-1);first=loan/n+loan*rate;last=loan/n+loan/n*rate;
+    }
+    var m=document.getElementById('q-method').value;
+    interest=(m==='equal'?equal*n:loan*rate*(n+1)/2)-loan;
+  }
+  return {price:price,disc:disc,net:net,tax:tax,ins:ins,reg:reg,deco:deco,other:other,total:total,dp:dp,years:years,loan:loan,n:n,equal:equal,first:first,last:last,interest:interest,
+    method:document.getElementById('q-method').value,model:document.getElementById('q-model').selectedOptions[0].textContent};
+}
+function calcUpdate(){
+  var d=calcData();
+  var rows=[['裸车价',d.net],['购置税',d.tax],['保险',d.ins],['上牌费',d.reg],['装潢/精品',d.deco],['其他',d.other]];
+  var html=rows.map(function(r){return '<div class="qrow"><span>'+r[0]+'</span><span>¥ '+money(r[1])+'</span></div>';}).join('');
+  html+='<div class="qrow total" style="color:var(--brand-2)"><span>落地价合计</span><span>¥ '+money(d.total)+'</span></div>';
+  html+='<div class="qsec">贷款测算</div>';
+  html+='<div class="qrow"><span>贷款金额（首付 '+d.dp+'%）</span><span>¥ '+money(d.loan)+'</span></div>';
+  html+='<div class="qrow"><span>期限 / 方式</span><span>'+d.years+' 年 / '+(d.method==='equal'?'等额本息':'等额本金')+'</span></div>';
+  if(d.method==='equal')html+='<div class="qrow"><span>每月月供</span><span style="color:var(--brand-2);font-weight:600">¥ '+money(d.equal)+'</span></div>';
+  else html+='<div class="qrow"><span>首月 / 末月月供</span><span style="color:var(--brand-2);font-weight:600">¥ '+money(d.first)+' / ¥ '+money(d.last)+'</span></div>';
+  html+='<div class="qrow"><span>预估总利息</span><span>¥ '+money(d.interest)+'</span></div>';
+  document.getElementById('calcResult').innerHTML=html;
+}
+function quoteText(){
+  var d=calcData(),lines=['【车辆报价单】','车型：'+(d.model==='自定义'?'自定义车型':d.model),'','— 费用明细 —'];
+  [['裸车价（优惠后）',d.net],['购置税',d.tax],['保险',d.ins],['上牌费',d.reg],['装潢/精品',d.deco],['其他',d.other]].forEach(function(r){lines.push(r[0]+'：¥'+money(r[1]));});
+  lines.push('落地价合计：¥'+money(d.total),'','— 贷款方案 —','首付比例：'+d.dp+'%','贷款金额：¥'+money(d.loan),'期限：'+d.years+'年');
+  if(d.method==='equal')lines.push('每月月供：¥'+money(d.equal));else lines.push('首月月供：¥'+money(d.first)+'，末月：¥'+money(d.last));
+  lines.push('','报价日期：'+today()+'（仅供参考，以店内实际政策为准）');
+  return lines.join('\n');
+}
+function showQuote(){
+  var d=calcData();
+  var rows=[['裸车价（优惠后）',d.net],['购置税',d.tax],['保险',d.ins],['上牌费',d.reg],['装潢/精品',d.deco],['其他',d.other]];
+  var body='<div class="quote"><h2>车辆报价单</h2><div class="qsub">'+(d.model==='自定义'?'定制方案':esc(d.model))+' · '+today()+'</div>';
+  body+=rows.map(function(r){return '<div class="qrow"><span>'+r[0]+'</span><span>¥ '+money(r[1])+'</span></div>';}).join('');
+  body+='<div class="qrow total"><span>落地价合计</span><span>¥ '+money(d.total)+'</span></div>';
+  body+='<div class="qsec">贷款方案</div><div class="qrow"><span>首付 '+d.dp+'% · '+d.years+'年 · '+(d.method==='equal'?'等额本息':'等额本金')+'</span><span>贷款 ¥'+money(d.loan)+'</span></div>';
+  body+='<div class="qrow"><span>'+(d.method==='equal'?'每月月供':'首月/末月月供')+'</span><span style="font-weight:600">¥ '+(d.method==='equal'?money(d.equal):money(d.first)+' / '+money(d.last))+'</span></div>';
+  body+='<div class="qnote">本报价单由销售工具箱生成，价格仅供参考，最终以店内实际成交政策为准。</div></div>';
+  openModal('报价单预览',body,'<button class="btn" onclick="window.print()">打印报价单</button><button class="btn" onclick="closeModal()">关闭</button>');
+}
+function copyQuote(){
+  var txt=quoteText();
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(function(){toast('报价文本已复制');},function(){fallbackCopy(txt);});}
+  else fallbackCopy(txt);
+}
+function fallbackCopy(txt){
+  var ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();
+  try{document.execCommand('copy');toast('已复制');}catch(e){toast('复制失败，请手动选择');}
+  document.body.removeChild(ta);
+}
+
+/* ========== 报价方案收藏 ========== */
+function snapshot(){
+  var ids=['model','price','discount','tax','taxval','ins','reg','deco','other','dp','years','rate','method'];
+  var o={};ids.forEach(function(k){o[k]=document.getElementById('q-'+k).value;});return o;
+}
+function saveCurrentQuote(){
+  var d=calcData();
+  var name=(d.model==='自定义'?'自定义':d.model)+' · ¥'+money(d.total);
+  openModal('收藏报价方案',
+    '<div class="field"><label>方案名称</label><input id="qq-name" value="'+esc(name)+'"></div>'+
+    '<div class="desc">将保存当前全部报价参数，下次可一键载入继续修改。</div>',
+    '<button class="btn" onclick="closeModal()">取消</button><button class="btn primary" onclick="doSaveQuote()">保存方案</button>');
+}
+function doSaveQuote(){
+  var name=document.getElementById('qq-name').value.trim();if(!name){toast('请填写方案名称');return;}
+  var d=calcData();
+  S.quotes.unshift({id:uid(),name:name,snap:snapshot(),total:d.total,date:today()});
+  save();closeModal();renderQuotes();toast('方案已收藏');
+}
+function renderQuotes(){
+  var box=document.getElementById('quoteList');if(!box)return;
+  document.getElementById('quoteCount').textContent='共 '+S.quotes.length+' 个方案';
+  box.innerHTML=S.quotes.length?S.quotes.map(function(q){
+    return '<div class="quote-row"><div class="qi"><div class="qn">'+esc(q.name)+'</div><div class="qm">落地价 ¥'+money(q.total)+' · 收藏于 '+esc(q.date)+'</div></div>'+
+      '<button class="btn sm primary" onclick="loadQuote(\''+q.id+'\')">载入</button>'+
+      '<button class="btn sm danger" onclick="delQuote(\''+q.id+'\')">删</button></div>';
+  }).join(''):'<div class="empty">还没有收藏的方案，点上方"收藏此方案"保存常用报价</div>';
+}
+function loadQuote(id){
+  var q=S.quotes.find(function(x){return x.id===id;});if(!q)return;
+  for(var k in q.snap){var el=document.getElementById('q-'+k);if(el)el.value=q.snap[k];}
+  calcUpdate();toast('方案已载入，可继续修改');
+}
+function delQuote(id){if(!confirm('删除该方案？'))return;S.quotes=S.quotes.filter(function(x){return x.id!==id;});save();renderQuotes();}
+
+/* ========== 车型价格库 ========== */
+function editPrice(id){
+  var p=id?S.prices.find(function(x){return x.id===id;}):null;
+  var body='<div class="grid g2">'+fld('品牌','p-brand',p&&p.brand)+fld('车型','p-model',p&&p.model)+'</div>'+
+    '<div class="grid g2">'+fld('配置','p-trim',p&&p.trim)+fld('指导价（元）','p-guide',p&&p.guide)+'</div>'+
+    fld('参考优惠（元）','p-discount',p&&p.discount);
+  openModal(p?'编辑车型价格':'添加车型价格',body,'<button class="btn" onclick="closeModal()">取消</button><button class="btn primary" onclick="savePrice(\''+(id||'')+'\')">保存</button>');
+}
+function savePrice(id){
+  var p=id?S.prices.find(function(x){return x.id===id;}):null;var isNew=!p;if(isNew)p={id:uid()};
+  p.brand=document.getElementById('p-brand').value.trim();p.model=document.getElementById('p-model').value.trim();
+  p.trim=document.getElementById('p-trim').value.trim();p.guide=parseFloat(document.getElementById('p-guide').value)||0;
+  p.discount=parseFloat(document.getElementById('p-discount').value)||0;
+  if(isNew)S.prices.push(p);save();closeModal();renderCalc();toast('已保存');
+}
+function delPrice(id){if(!confirm('删除该车型？'))return;S.prices=S.prices.filter(function(x){return x.id!==id;});save();renderCalc();}
+
+/* ========== 话术速查 ========== */
+var SCRIPT_FLOW=['线上响应','首邀三件套','短信模板','需求探询','展厅接待','静态讲解','产品亮点','品牌宣传','竞品对比','竞品攻防','试驾提示','异议应对','金融政策','活动政策','成交促单','交车售后','到家关怀','营销文案'];
+function flowRank(cat){var i=SCRIPT_FLOW.indexOf(cat);return i<0?SCRIPT_FLOW.length:i;}
+function renderScripts(){
+  var used={};S.scripts.forEach(function(s){used[s.cat]=1;});
+  var cats=['全部'].concat(SCRIPT_FLOW.filter(function(c){return used[c];}));
+  S.scripts.forEach(function(s){if(cats.indexOf(s.cat)<0)cats.push(s.cat);});
+  if(cats.indexOf(S.settings.cat)<0)S.settings.cat='全部';
+  document.getElementById('scriptCats').innerHTML=cats.map(function(c){return '<button class="chip'+(S.settings.cat===c?' active':'')+'" onclick="setCat(\''+esc(c)+'\')">'+esc(c)+'</button>';}).join('');
+  var q=(document.getElementById('scriptSearch').value||'').toLowerCase();
+  var list=S.scripts.filter(function(s){
+    return (S.settings.cat==='全部'||s.cat===S.settings.cat)&&(s.title+' '+(s.approach||'')+' '+s.content).toLowerCase().indexOf(q)>=0;
+  });
+  list=list.map(function(s,i){return {s:s,i:i};}).sort(function(a,b){
+    var d=flowRank(a.s.cat)-flowRank(b.s.cat);return d!==0?d:a.i-b.i;
+  }).map(function(x){return x.s;});
+  document.getElementById('scriptCount').textContent='共 '+list.length+' 条';
+  var box=document.getElementById('scriptList');
+  if(!list.length){box.innerHTML='<div class="empty">没有匹配的话术</div>';return;}
+  box.innerHTML=list.map(function(s){
+    var ap=s.approach?'<div class="approach"><span class="lbl">做法</span>'+esc(s.approach)+'</div>':'';
+    var sp='<div class="speech"><span class="lbl">话术</span>'+esc(s.content)+'</div>'+
+      '<div class="speech-act"><button class="btn sm" onclick="copyScript(\''+s.id+'\')">复制话术</button></div>';
+    return '<div class="script"><div class="st"><span class="pill brand">'+esc(s.cat)+'</span>'+esc(s.title)+
+      '<span class="sp"></span><button class="btn sm" onclick="editScript(\''+s.id+'\')">编辑</button> <button class="btn sm danger" onclick="delScript(\''+s.id+'\')">删</button></div>'+
+      ap+sp+'</div>';
+  }).join('');
+}
+function copyScript(id){
+  var s=S.scripts.find(function(x){return x.id===id;});if(!s)return;
+  var txt=s.content||'';
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(function(){toast('话术已复制');},function(){fallbackCopyScript(txt);});}
+  else fallbackCopyScript(txt);
+}
+function fallbackCopyScript(txt){
+  var ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();
+  try{document.execCommand('copy');toast('话术已复制');}catch(e){toast('复制失败');}
+  document.body.removeChild(ta);
+}
+function setCat(c){S.settings.cat=c;save();renderScripts();}
+function resetScripts(){
+  if(!confirm('恢复默认话术库？将重新载入 45 条内置话术，你自己新增/编辑的话术会保留。'))return;
+  var cur=defaults().scripts;
+  var titles={};cur.forEach(function(s){titles[s.title]=1;});
+  var custom=S.scripts.filter(function(s){return s&&s.title&&!titles[s.title];});
+  var edited=S.scripts.filter(function(s){return s&&titles[s.title]&&cur.every(function(x){return x.title!==s.title||x.content!==s.content;});});
+  var keep={};custom.concat(edited).forEach(function(s){keep[s.id]=s;});
+  S.scripts=cur.map(function(s){return keep[s.id]||s;}).concat(custom.concat(edited).filter(function(s){return !cur.some(function(x){return x.id===s.id;});}));
+  S.scriptVer=4;S.settings.cat='全部';save();renderScripts();toast('已恢复默认话术库，共 '+S.scripts.length+' 条');
+}
+function editScript(id){
+  var s=id?S.scripts.find(function(x){return x.id===id;}):null;
+  var body='<div class="grid g2">'+fld('分类','s-cat',s&&s.cat)+fld('标题','s-title',s&&s.title)+'</div>'+
+    '<div class="field"><label>做法 / 思路（怎么想、怎么做，写给自己的策略提示）</label><textarea id="s-approach" style="min-height:80px" placeholder="例如：先认同情绪，再把价格拆成月供，用方案转移焦点">'+esc(s&&s.approach)+'</textarea></div>'+
+    '<div class="field"><label>话术原话（实际对客户说的话，可直接复制使用）</label><textarea id="s-content" style="min-height:120px" placeholder="输入要说的原话">'+esc(s&&s.content)+'</textarea></div>';
+  openModal(s?'编辑话术':'新增话术',body,'<button class="btn" onclick="closeModal()">取消</button><button class="btn primary" onclick="saveScript(\''+(id||'')+'\')">保存</button>');
+}
+function saveScript(id){
+  var s=id?S.scripts.find(function(x){return x.id===id;}):null;var isNew=!s;if(isNew)s={id:uid()};
+  s.cat=document.getElementById('s-cat').value.trim()||'未分类';s.title=document.getElementById('s-title').value.trim();
+  s.approach=document.getElementById('s-approach').value.trim();
+  s.content=document.getElementById('s-content').value.trim();
+  if(!s.title){toast('请填写标题');return;}
+  if(isNew)S.scripts.push(s);save();closeModal();renderScripts();toast('已保存');
+}
+function delScript(id){if(!confirm('删除该话术？'))return;S.scripts=S.scripts.filter(function(x){return x.id!==id;});save();renderScripts();}
+
+/* ========== 个人提成计算器 ========== */
+function setRule(k,v){
+  S.comm[k]=(k==='base'||k==='finance'||k==='insurancePct'||k==='decoPct')?(parseFloat(v)||0):v;
+  save();renderComm();
+}
+function addCarRate(){S.comm.carRates.push({id:uid(),model:'新车型',rate:0});save();renderComm();}
+function setCarRate(id,k,v){var r=S.comm.carRates.find(function(x){return x.id===id;});if(r){r[k]=(k==='rate')?(parseFloat(v)||0):v;save();renderComm();}}
+function delCarRate(id){S.comm.carRates=S.comm.carRates.filter(function(x){return x.id!==id;});save();renderComm();}
+function addTier(){S.comm.tiers.push({id:uid(),count:1,bonus:0});save();renderComm();}
+function setTier(id,k,v){var r=S.comm.tiers.find(function(x){return x.id===id;});if(r){r[k]=parseFloat(v)||0;save();renderComm();}}
+function delTier(id){S.comm.tiers=S.comm.tiers.filter(function(x){return x.id!==id;});save();renderComm();}
+
+function dealCalc(d){
+  var c=S.comm;
+  var r=c.carRates.find(function(x){return x.model===d.model;});
+  var car=r?(parseFloat(r.rate)||0):0;
+  var fin=d.finance?(parseFloat(c.finance)||0):0;
+  var ins=(parseFloat(d.insurance)||0)*(parseFloat(c.insurancePct)||0)/100;
+  var deco=(parseFloat(d.deco)||0)*(parseFloat(c.decoPct)||0)/100;
+  return {car:car,fin:fin,ins:ins,deco:deco,total:car+fin+ins+deco};
+}
+function commData(){
+  var c=S.comm;
+  var month=c.month||today().slice(0,7);
+  var list=S.comm.deals.filter(function(d){return (d.date||'').indexOf(month)===0;});
+  var detail=list.map(function(d){var x=dealCalc(d);return {d:d,calc:x};});
+  var sum={car:0,fin:0,ins:0,deco:0},variable=0;
+  detail.forEach(function(x){sum.car+=x.calc.car;sum.fin+=x.calc.fin;sum.ins+=x.calc.ins;sum.deco+=x.calc.deco;variable+=x.calc.total;});
+  var tier=0;S.comm.tiers.forEach(function(t){if(list.length>=t.count&&t.bonus>tier)tier=t.bonus;});
+  var base=parseFloat(c.base)||0;
+  return {month:month,detail:detail,sum:sum,variable:variable,tier:tier,base:base,total:base+variable+tier};
+}
+function renderComm(){
+  if(!document.getElementById('cm-base'))return;
+  var c=S.comm;
+  document.getElementById('cm-base').value=c.base;
+  document.getElementById('cm-month').value=c.month||today().slice(0,7);
+  document.getElementById('cm-fin').value=c.finance;
+  document.getElementById('cm-ins').value=c.insurancePct;
+  document.getElementById('cm-deco').value=c.decoPct;
+  document.getElementById('cm-carRates').innerHTML=c.carRates.map(function(r){
+    return '<div class="rule-row"><input value="'+esc(r.model)+'" onchange="setCarRate(\''+r.id+'\',\'model\',this.value)" placeholder="车型">'+
+      '<input type="number" value="'+r.rate+'" onchange="setCarRate(\''+r.id+'\',\'rate\',this.value)" style="max-width:90px" placeholder="每台提成">'+
+      '<button class="btn sm danger" onclick="delCarRate(\''+r.id+'\')">删</button></div>';
+  }).join('')||'<div class="empty" style="padding:10px">暂无车型提成规则</div>';
+  document.getElementById('cm-tiers').innerHTML=c.tiers.map(function(t){
+    return '<div class="rule-row"><span style="font-size:12px;color:var(--sub)">满</span>'+
+      '<input type="number" value="'+t.count+'" onchange="setTier(\''+t.id+'\',\'count\',this.value)" style="max-width:70px">'+
+      '<span style="font-size:12px;color:var(--sub)">台奖</span>'+
+      '<input type="number" value="'+t.bonus+'" onchange="setTier(\''+t.id+'\',\'bonus\',this.value)" style="max-width:90px">'+
+      '<span style="font-size:12px;color:var(--sub)">元</span>'+
+      '<button class="btn sm danger" onclick="delTier(\''+t.id+'\')">删</button></div>';
+  }).join('')||'<div class="empty" style="padding:10px">暂无阶梯奖金</div>';
+  var d=commData();
+  document.getElementById('cm-total').textContent='¥'+money(d.total);
+  document.getElementById('cm-count').textContent=d.detail.length;
+  document.getElementById('cm-variable').textContent='¥'+money(d.variable);
+  document.getElementById('cm-tier').textContent='¥'+money(d.tier);
+  var rows=[['月底薪',d.base],['单车提成',d.sum.car],['金融提成',d.sum.fin],['保险提成',d.sum.ins],['精品提成',d.sum.deco],['阶梯奖金',d.tier]];
+  document.getElementById('cmBreakdown').innerHTML=rows.map(function(r){
+    return '<div class="qrow"><span>'+r[0]+'</span><span>¥ '+money(r[1])+'</span></div>';
+  }).join('')+'<div class="qrow total" style="color:var(--brand-2)"><span>税前合计</span><span>¥ '+money(d.total)+'</span></div>';
+  var tb=document.getElementById('dealBody');
+  tb.innerHTML=d.detail.length?d.detail.map(function(x){
+    return '<tr><td>'+esc(x.d.date)+'</td><td>'+esc(x.d.model)+'</td><td>'+(x.d.finance?'<span class="pill ok">是</span>':'<span class="pill">否</span>')+'</td>'+
+      '<td>'+money(x.d.insurance)+'</td><td>'+money(x.d.deco)+'</td><td style="font-weight:600">¥'+money(x.calc.total)+'</td>'+
+      '<td><button class="btn sm" onclick="editDeal(\''+x.d.id+'\')">编辑</button> <button class="btn sm danger" onclick="delDeal(\''+x.d.id+'\')">删</button></td></tr>';
+  }).join(''):'<tr><td colspan="7"><div class="empty">该月份暂无成交记录，点上方"添加成交"</div></td></tr>';
+  document.getElementById('dealSummary').textContent='统计月份 '+d.month+' · 共 '+d.detail.length+' 台 · 单车 '+money(d.sum.car)+' + 金融 '+money(d.sum.fin)+' + 保险 '+money(d.sum.ins)+' + 精品 '+money(d.sum.deco)+' + 阶梯 '+money(d.tier)+' + 底薪 '+money(d.base)+' = ¥'+money(d.total)+'（税前估算，实际以公司核算为准）';
+}
+function editDeal(id){
+  var d=id?S.comm.deals.find(function(x){return x.id===id;}):null;
+  var opts=S.comm.carRates.map(function(r){return '<option'+(d&&d.model===r.model?' selected':'')+'>'+esc(r.model)+'</option>';}).join('');
+  var body='<div class="grid g2"><div class="field"><label>成交日期</label><input id="d-date" type="date" value="'+(d&&d.date?d.date:today())+'"></div>'+
+    '<div class="field"><label>车型</label><input id="d-model" list="d-models" value="'+esc(d&&d.model?d.model:'')+'" placeholder="可输入或选择"><datalist id="d-models">'+opts+'</datalist></div></div>'+
+    '<div class="grid g2"><div class="field"><label>是否做金融</label><select id="d-fin"><option value="1"'+(d&&d.finance?' selected':'')+'>是</option><option value="0"'+(d&&!d.finance?' selected':'')+'>否</option></select></div>'+
+    fld('保险金额（元）','d-ins',d&&d.insurance)+'</div>'+fld('精品金额（元）','d-deco',d&&d.deco);
+  openModal(d?'编辑成交':'添加成交',body,'<button class="btn" onclick="closeModal()">取消</button><button class="btn primary" onclick="saveDeal(\''+(id||'')+'\')">保存</button>');
+}
+function saveDeal(id){
+  var d=id?S.comm.deals.find(function(x){return x.id===id;}):null;var isNew=!d;if(isNew)d={id:uid()};
+  d.date=document.getElementById('d-date').value||today();
+  d.model=document.getElementById('d-model').value.trim();
+  d.finance=document.getElementById('d-fin').value==='1';
+  d.insurance=parseFloat(document.getElementById('d-ins').value)||0;
+  d.deco=parseFloat(document.getElementById('d-deco').value)||0;
+  if(!d.model){toast('请填写车型');return;}
+  if(isNew)S.comm.deals.push(d);
+  S.comm.month=d.date.slice(0,7);
+  save();closeModal();renderComm();toast('已保存');
+}
+function delDeal(id){if(!confirm('删除该成交记录？'))return;S.comm.deals=S.comm.deals.filter(function(x){return x.id!==id;});save();renderComm();}
+function copyComm(){
+  var d=commData();
+  var lines=['【'+d.month+' 收入明细】','底薪：¥'+money(d.base),'单车提成：¥'+money(d.sum.car),'金融提成：¥'+money(d.sum.fin),
+    '保险提成：¥'+money(d.sum.ins),'精品提成：¥'+money(d.sum.deco),'阶梯奖金：¥'+money(d.tier),'成交台数：'+d.detail.length,'税前合计：¥'+money(d.total),'（税前估算，实际以公司核算为准）'];
+  var txt=lines.join('\n');
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(function(){toast('已复制收入明细');},function(){fallbackCopy(txt);});}
+  else fallbackCopy(txt);
+}
+
+/* ========== 事件提醒器 ========== */
+var TODO_CATS=['客户跟进','交车办证','售后回访','内部事务','个人事务'];
+function renderTodo(){
+  if(!document.getElementById('td-today'))return;
+  var t=today(),list=S.todos||[];
+  var undone=list.filter(function(x){return !x.done;});
+  var over=undone.filter(function(x){return x.date&&x.date<t;}).length;
+  var tod=undone.filter(function(x){return x.date===t;}).length;
+  var week=undone.filter(function(x){return x.date&&x.date>t&&x.date<=dateAdd(t,7);}).length;
+  var done=list.filter(function(x){return x.done;}).length;
+  document.getElementById('td-today').textContent=tod;
+  document.getElementById('td-over').textContent=over;
+  document.getElementById('td-week').textContent=week;
+  document.getElementById('td-done').textContent=done;
+  var badge=document.getElementById('badge-todo');
+  var urgent=over+tod;
+  badge.textContent=urgent;badge.className='badge'+(urgent>0?' show':'');
+  var cat=S.settings.todoCat||'全部';
+  var cats=['全部'].concat(TODO_CATS);
+  list.forEach(function(x){if(x.cat&&cats.indexOf(x.cat)<0)cats.push(x.cat);});
+  if(cats.indexOf(cat)<0)cat='全部';
+  document.getElementById('todoCats').innerHTML=cats.map(function(c){
+    return '<button class="chip'+(cat===c?' active':'')+'" onclick="setTodoCat(\''+esc(c)+'\')">'+esc(c)+'</button>';
+  }).join('');
+  var show=list.filter(function(x){return cat==='全部'||x.cat===cat;});
+  show.sort(function(a,b){
+    if(a.done!==b.done)return a.done?1:-1;
+    if(a.date!==b.date)return (a.date||'9999').localeCompare(b.date||'9999');
+    return (a.time||'').localeCompare(b.time||'');
+  });
+  var box=document.getElementById('todoList');
+  if(!show.length){box.innerHTML='<div class="empty">暂无事件，点"新增事件"记下要办的事</div>';return;}
+  box.innerHTML=show.map(function(x){
+    var late=!x.done&&x.date&&x.date<t;
+    var isToday=!x.done&&x.date===t;
+    var dateLabel=late?'<span class="pill danger">逾期 '+daysBetween(x.date,t)+' 天 · '+esc(x.date)+'</span>':
+      (isToday?'<span class="pill warn">今天'+(x.time?' '+esc(x.time):'')+'</span>':
+      '<span class="pill">'+(x.date?esc(x.date)+(x.time?' '+esc(x.time):''):'未定日期')+'</span>');
+    return '<div class="todo-item'+(x.done?' done':'')+'">'+
+      '<div class="todo-chk'+(x.done?' checked':'')+'" onclick="toggleTodo(\''+x.id+'\')">'+(x.done?'✓':'')+'</div>'+
+      '<div class="ti"><div class="tt">'+esc(x.title)+'</div>'+
+      '<div class="tm">'+dateLabel+' <span class="pill">'+esc(x.cat||'未分类')+'</span>'+(x.note?' · '+esc(x.note):'')+'</div></div>'+
+      '<div class="ta"><button class="btn sm" onclick="editTodo(\''+x.id+'\')">编辑</button> <button class="btn sm danger" onclick="delTodo(\''+x.id+'\')">删</button></div></div>';
+  }).join('');
+}
+function daysBetween(a,b){return Math.round((new Date(b+'T00:00:00')-new Date(a+'T00:00:00'))/86400000);}
+function setTodoCat(c){S.settings.todoCat=c;save();renderTodo();}
+function toggleTodo(id){
+  var x=S.todos.find(function(v){return v.id===id;});if(!x)return;
+  x.done=!x.done;save();renderTodo();
+}
+function editTodo(id){
+  var x=id?S.todos.find(function(v){return v.id===id;}):null;
+  var opts=TODO_CATS.concat((x&&x.cat&&TODO_CATS.indexOf(x.cat)<0)?[x.cat]:[]).map(function(c){
+    return '<option'+(x&&x.cat===c?' selected':'')+'>'+esc(c)+'</option>';
+  }).join('');
+  var body='<div class="field"><label>事件标题</label><input id="t-title" value="'+esc(x&&x.title)+'" placeholder="例如：周五前给张先生发报价"></div>'+
+    '<div class="grid g2"><div class="field"><label>日期</label><input id="t-date" type="date" value="'+(x&&x.date?x.date:today())+'"></div>'+
+    '<div class="field"><label>时间（可选）</label><input id="t-time" type="time" value="'+(x&&x.time?x.time:'')+'"></div></div>'+
+    '<div class="field"><label>分类</label><select id="t-cat">'+opts+'</select></div>'+
+    '<div class="field"><label>备注（可选）</label><input id="t-note" value="'+esc(x&&x.note)+'" placeholder="补充说明"></div>';
+  openModal(x?'编辑事件':'新增事件',body,'<button class="btn" onclick="closeModal()">取消</button><button class="btn primary" onclick="saveTodo(\''+(id||'')+'\')">保存</button>');
+}
+function saveTodo(id){
+  var x=id?S.todos.find(function(v){return v.id===id;}):null;var isNew=!x;if(isNew)x={id:uid(),done:false};
+  x.title=document.getElementById('t-title').value.trim();
+  if(!x.title){toast('请填写事件标题');return;}
+  x.date=document.getElementById('t-date').value;
+  x.time=document.getElementById('t-time').value;
+  x.cat=document.getElementById('t-cat').value;
+  x.note=document.getElementById('t-note').value.trim();
+  if(isNew)S.todos.push(x);
+  save();closeModal();renderTodo();toast(isNew?'事件已添加':'已保存');
+}
+function delTodo(id){if(!confirm('删除该事件？'))return;S.todos=S.todos.filter(function(v){return v.id!==id;});save();renderTodo();}
+function clearDoneTodos(){
+  var n=(S.todos||[]).filter(function(v){return v.done;}).length;
+  if(!n){toast('没有已完成的事件');return;}
+  if(!confirm('清除全部 '+n+' 条已完成的事件？'))return;
+  S.todos=S.todos.filter(function(v){return !v.done;});save();renderTodo();toast('已清除 '+n+' 条');
+}
+
+/* ========== 启动 ========== */
+save();
+renderAll();
+</script>
+</body>
+</html>
